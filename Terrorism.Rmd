@@ -19,20 +19,8 @@ p_needed <-
     "sandwich",
     "MASS",
     "ggplot2",
-    "reshape2",
     "dplyr",
-    "tidyr",
-    "foreign",
-    "stats",
-    "lattice",
-    "latticeExtra",
-    "psych",
-    "Matrix",
-    "erer",
-    "tikzDevice",
-    "texreg",
-    "stargazer",
-    "caret"
+    "tidyr"
   )
 
 packages <- rownames(installed.packages())
@@ -243,7 +231,7 @@ wvs_sub <- WVS_W7[,c(
 "Q290"
  )]
 
-write.csv(wvs_sub,"~/Desktop/MZES/Daniel/Datasets/Terrorism_migration/wvs_sub.csv", row.names = FALSE)
+#write.csv(wvs_sub,"~/Desktop/MZES/Daniel/Datasets/Terrorism_migration/wvs_sub.csv", row.names = FALSE)
 
 ```
 
@@ -494,7 +482,7 @@ evs_sub <- evs_restricted[,c(
 "v378"
 )]
 
-write.csv(evs_sub,"~/Desktop/MZES/Daniel/Datasets/Terrorism_migration/evs_sub.csv", row.names = FALSE)
+#write.csv(evs_sub,"~/Desktop/MZES/Daniel/Datasets/Terrorism_migration/evs_sub.csv", row.names = FALSE)
 
 ```
 
@@ -637,7 +625,7 @@ afro_sub <- afro[,c(
 "geographic_exactness"
 )]
 
-write.csv(afro_sub,"~/Desktop/MZES/Daniel/Datasets/Terrorism_migration/afro_sub.csv", row.names = FALSE)
+#write.csv(afro_sub,"~/Desktop/MZES/Daniel/Datasets/Terrorism_migration/afro_sub.csv", row.names = FALSE)
 
 ```
 
