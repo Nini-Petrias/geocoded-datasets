@@ -1,5 +1,5 @@
 ---
-title: "Terrorism"
+title: "Geocoded-data"
 author: "Nino Petriashvili"
 date: "27 07 2022"
 output:
