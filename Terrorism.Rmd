@@ -1,0 +1,651 @@
+---
+title: "Terrorism"
+author: "Nino Petriashvili"
+date: "27 07 2022"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+## Prerequisites
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# required packages:
+p_needed <-
+  c(
+    "viridis",
+    "knitr",
+    "sandwich",
+    "MASS",
+    "ggplot2",
+    "reshape2",
+    "dplyr",
+    "tidyr",
+    "foreign",
+    "stats",
+    "lattice",
+    "latticeExtra",
+    "psych",
+    "Matrix",
+    "erer",
+    "tikzDevice",
+    "texreg",
+    "stargazer",
+    "caret"
+  )
+
+packages <- rownames(installed.packages())
+p_to_install <- p_needed[!(p_needed %in% packages)]
+
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+
+sapply(p_needed, require, character.only = TRUE)
+```
+
+
+Variables from WVS Wave 7 (81 variables out of 552):
+*Technical Variables:*
+DOI 
+A_STUDY - 1.- EVS 2.- WVS
+A_WAVE - 5.- EVS wave 5 (2017-2020); 7.- WVS wave 7 (2017-2022)
+A_YEAR 
+B_COUNTRY 
+B_COUNTRY_ALPHA 
+D_INTERVIEW - Interview ID
+J_INTDATE  - Date of interview (Numeric variable recorded in format: YYYYMMDD)
+FW_END  - Year/month of end-fieldwork 
+FW_START -  Year/month of start-fieldwork
+K_TIME_START - Start time of the interview [HH.MM] 
+K_TIME_END - Start time of the interview [HH.MM]
+K_DURATION - End time of the interview [HH.MM]
+Q_MODE - Mode of data collection
+N_REGION_ISO - Region ISO 3166-2
+N_REGION_WVS - Region country specific 
+N_REGION_NUTS2 - *this variable is not in the data only in the questionnaire*
+N_TOWN - Settlement name 
+G_TOWNSIZE - Settlement size_8 groups 
+G_TOWNSIZE2 - Settlement size_5 groups 
+H_SETTLEMENT - Settlement type 
+H_URBRURAL - Urban-Rural 
+O1_LONGITUDE 
+O2_LATITUDE 
+S_INTLANGUAGE   - Language in which interview was conducted 
+E_RESPINT - Respondent interested during the interview 
+E1_LITERACY - Respondent’s literacy
+F_INTPRIVACY - Interview privacy 
+S025 - Country – year 
+
+*Social values, attitudes:*
+#On this list are various groups of people. Could you please mention any that you would not like to have as neighbors?
+Q19 People of a different race
+Q21 Immigrants/foreign workers
+Q26 People who speak a different language
+Q34 When jobs are scarce, employers should give priority to people of this country over immigrants
+Q49 All things considered, how satisfied are you with your life as a whole these days? Using this card on which 1 means you are “completely dissatisfied” and 10 means you are “completely satisfied” where would you put your satisfaction with your life as a whole? 
+
+*Economic Situation:*
+Q50. How satisfied are you with the financial situation of your household?
+#In the last 12 months, how often have your or your family…?
+Q51 - Gone without enough food to eat
+Q52 - Felt unsafe from crime in your home
+Q53 - Gone without medicine or medical treatment that you needed
+Q54 - Gone without a cash income
+Q55 - Gone without a safe shelter over your head
+Q56. Comparing your standard of living with your parents’ standard of living when they were about your age, would you say that you are better off, worse off or about the same?
+
+*Questions on migration:*
+Q121- How would you evaluate the impact of migrants on the development of [your country]? [on the 1-5 scale where 5- very good, 1 - very bad]
+#From your point of view, what have been the effects of immigration on the development of [this country]? For each of the following statements about the effects of immigration, please, tell me whether you agree or disagree with it:
+Q122 - Fills important jobs vacancies
+Q123 - Strengthens cultural diversity
+Q124 - Increases the crime rate
+Q125 - Gives asylum to political refugees who are persecuted elsewhere
+Q126 - Increases the risks of terrorism
+Q127 - Offers people from poor countries a better living
+Q128 - Increases unemployment
+Q129 - Leads to social conflict
+
+Q130 – Should government let the people in?
+
+Q147 - To what degree are you worried about the following situations? (terrorism)
+
+*Questions on authoritarian attitudes:*
+Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between:
+Q191.- Violence against other people
+Q192.- Terrorism as a political, ideological or religious mean 
+Q194.- Political violence
+Q195.- Death penalty 
+
+Do you think that your country’s government should or should not have the right to do the following:
+Q196 - Keep people under video surveillance in public areas  
+Q197 - Monitor all e-mails and any other information exchanged on the Internet 
+Q198 - Collect information about anyone living in this country without their knowledge 
+
+*Control Variables:*
+Q223 – Voting for which party?
+Q240 – L-R self-placement
+
+Demographics: 
+Q260- Respondent’s sex (1 -m, 2 - f)
+Q261 - Can you tell me your year of birth, please?
+Q262 - This means you are _______ years old (write in age in two digits).
+Q263 – born immigrant?
+Q264-265 -  Are your mother and father immigrants to this country or not? Please, indicate separately for each of them?
+Q266-268. In which country were you, your father and your mother (or those who raised you) born?
+Q269 - Are you a citizen of this country?
+Q273 – married?
+Q274 - Do you have any children?
+#What is the highest educational level that you, your spouse, your mother and your father have attained? 
+Q275 - Respondent;
+Q276 - Spouse; 
+Q277 - Mother;
+Q278 - Father
+Q279. Are you employed now or not? If yes, about how many hours a week? If more than one job: only for the main job.
+Q280. Is your spouse employed? In his/her LAST job was he/she employed (either full time or part time) or was he/she self-employed?
+Q287. People sometimes describe themselves as belonging to the working class, the middle class, or the upper or lower class. Would you describe yourself as belonging to the..
+Q289. Do you belong to a religion or religious denomination? If yes, which one?
+Q290. Respondent’s ethnic group
+
+
+```{r wvs wave 7}
+WVS_W7 <- read.csv("WVS_Cross-National_Wave_7_csv_v4_0.csv")
+
+wvs_sub <- WVS_W7[,c(
+#Technical Variables:
+"doi", 
+"A_STUDY",
+"A_WAVE", 
+"A_YEAR", 
+"B_COUNTRY", 
+"B_COUNTRY_ALPHA", 
+"D_INTERVIEW", 
+"J_INTDATE", 
+"FW_END",   
+"FW_START", 
+"K_TIME_START", 
+"K_TIME_END",
+"K_DURATION", 
+"Q_MODE", 
+"N_REGION_ISO", 
+"N_REGION_WVS", 
+"N_TOWN", 
+"G_TOWNSIZE", 
+"G_TOWNSIZE2", 
+"H_SETTLEMENT", 
+"H_URBRURAL",
+"O1_LONGITUDE",  
+"O2_LATITUDE", 
+"S_INTLANGUAGE",    
+"E_RESPINT",
+"E1_LITERACY" , 
+"F_INTPRIVACY", 
+"S025", 
+#Social values, attitudes
+"Q19", 
+"Q21", 
+"Q26", 
+"Q34", 
+"Q49", 
+#Economic Situation
+"Q50", 
+"Q51", 
+"Q52", 
+"Q53", 
+"Q54", 
+"Q55", 
+"Q56", 
+#Questions on migration:
+"Q121", 
+"Q122", 
+"Q123", 
+"Q124", 
+"Q125", 
+"Q126", 
+"Q127", 
+"Q128", 
+"Q129", 
+"Q130",
+"Q147",  
+#Questions on authoritarian attitudes
+"Q191", 
+"Q192", 
+"Q194", 
+"Q195", 
+"Q196", 
+"Q197", 
+"Q198", 
+#Control Variables: 
+"Q223", 
+"Q240", 
+"Q260", 
+"Q261", 
+"Q262", 
+"Q263", 
+"Q264",
+"Q265",
+"Q266",
+"Q267",
+"Q268",
+"Q269",
+"Q273",
+"Q274",
+"Q275",
+"Q276",
+"Q277",
+"Q278",
+"Q279",
+"Q280",
+"Q287",
+"Q289",
+"Q290"
+ )]
+
+write.csv(wvs_sub,"~/Desktop/MZES/Daniel/Datasets/Terrorism_migration/wvs_sub.csv", row.names = FALSE)
+
+```
+
+
+Variables from EVS (European Values Study 2008: Integrated Dataset (EVS 2008) - Restricted Use File):
+*Technical Variables:*
+doi
+id_cocas - unified respondent number
+caseno - original respondent number (constructed)
+intno - interviewer number
+year - survey year
+country - country code
+country1 - country code [with split ups]
+cntry_y - country_year
+cntry1_y - country_[with split ups]- year
+c_abrv - country abbreviation
+c_abrv1 - country abbreviation [with split ups]
+
+#Respondent specific questions:
+Feeling of happiness - v8
+State of health (subjective) - v9
+Neighbours: People with a criminal record - v46
+Neighbours: People of a different race - v47
+Neighbours: Muslims - v53
+Neighbours: Immigrants/foreign workers - v54
+Most people can be trusted - v62
+Satisfaction with your life -  v66
+How much freedom of choice and control - v65
+
+#Work
+Jobs scarce: Employers should give priority to (nation) people than immigrants -  v102
+Employed - v89
+Job satisfaction -  v90
+
+#Politics and Society
+Interest in politics - v186
+Freedom or equality - v192
+Self-positioning in political scale - v193
+Basic kinds of attitudes concerning society - v200
+Income equality - v198
+Immigrant policy - v266
+How often follows politics in the news - v281
+Give authorities information to help justice - v282
+Stick to own affairs - v283
+Feel concerned about: Immigrants - v292
+Would you vote at a general election tomorrow - v263
+Which political party would you vote for: First choice (EVS) - v264
+Which political party would you vote for - left/right scale - v264_LR
+Opinion on terrorism - v267
+
+#Religion
+Statement: good/evil, clear/no clear guidelines - v104
+Belong to religious denomination - v105
+Justifiable: death penalty - v252
+
+#National Identity 
+Citizen of [country] - v255
+Immigrants take away jobs from [nationality] v268
+Immigrants undermine countrys cultural life v269
+Immigrants increase crime problems v270
+Immigrants are a strain on welfare system v271
+Immigrants will become a threat to society v272
+Immigrants maintain own/take over customs v273
+Immigrants living in your country: feels like a stranger v274
+Immigrants living in your country: there are too many v275
+EU fears: loss of social security v257
+EU fears: lose national identity/culture v258
+EU fears: loss of jobs v261
+
+#Respondents' Parents
+Father born in [country] v309
+Fathers country of birth - ISO 3166-1 code v310b
+Mother born in [country] v311
+Mothers country of birth - ISO 3166-1 code v312b
+Highest educational level attained father/mother (8 categories) - v355_4
+
+#Partner
+Partner/spouse born in [country] v342 
+Spouse/partners country of birth - ISO 3166-1code - v343b
+Highest educational level attained spouse partner (8 categories)  - v344_4
+Educational level partner (recoded) v344_r
+
+#Socio demographics
+Sex v302
+Year of birth birthy v303
+Having [country s] nationality v304
+Respondents nationality - ISO 3166-1 code v305b
+Respondent born in [country] v306
+Respondents country of birth - ISO 3166-1 code - v307b
+Year in which respondent came to live in [country]  - v308
+Age - age
+Age recoded - age_r
+Age recoded (3 intervals) - age_r2
+Stable relationship - v316
+Highest educational level attained - v336_4
+Educational level respondent: ISCED- code one digit - v336
+Educational level respondent: ISCED-code two digits - v336_2
+Educational level respondent: ISCED-code three digits - v336_3
+Educational level respondent: Country specific (EVS) - v336_cs
+Education level (recoded) - v336_r
+
+Employment status - v337
+Employment/self-employment: last job v338
+
+Weekly household income v353WK
+Weekly household income (country specific) v353W_cs
+Monthly household income v353MM
+Monthly household income (country specific) v353M_cs
+Annual household income v353YR
+Annual household income (country specific) v353Y_cs
+Income level - v353_r
+
+#Geocodes
+v371b_N1 - region where interview was conducted: NUTS-1
+v371b_N2 - region where interview was conducted: NUTS-2
+v371b_N3 - region where interview was conducted: NUTS-3
+Size of town - v370
+
+#Variables about the Interview  
+Total length of interview v374
+Time of interview: start hour v373a
+Time of interview: start minute v373b
+Time of interview: end hour v374a
+Time of interview: end minute v374b
+Time at the end of interview v374c
+Date interview   - v372
+Respondent interested during the interview v375
+Year/month of start-fieldwork - v377
+Year/month of end-fieldwork - v378
+
+```{r EVS}
+evs_restricted <- read.dta("ZA4799_v1-0-0.dta")
+
+evs_sub <- evs_restricted[,c(
+#Technical Variables
+"doi", 
+"id_cocas", #unified respondent number
+"caseno", #original respondent number
+"intno", 
+"year",
+"country", 
+"country1", 
+"c_abrv",    
+"c_abrv1", 
+"cntry_y",
+"cntry1_y",
+#Respondent specific questions:
+"v8", 
+"v9", 
+"v46", 
+"v47", 
+"v53", 
+"v54", 
+"v62", 
+"v66", 
+"v65", 
+#Work
+"v102",
+"v89", 
+"v90", 
+#Politics and Society
+"v186", 
+"v192", 
+"v193", 
+"v200", 
+"v198",
+"v266",
+"v281",
+"v282",
+"v283",
+"v292",
+"v263",
+"v264",
+"v264_LR",
+"v267",
+#Religion
+"v104",
+"v105",
+"v252",
+#National Identity 
+"v255",
+"v268",
+"v269",
+"v270",
+"v271",
+"v272",
+"v273",
+"v274",
+"v275",
+"v257",
+"v258",
+"v261",
+#Respondents' Parents
+"v309",
+"v310b",
+"v311",
+"v312b",
+"v355_4",
+#Partner
+"v342", 
+"v343b",
+"v344_4",
+"v344_r",
+#Socio demographics
+"v302",
+"v303",
+"v304",
+"v305b",
+"v306",
+"v307b",
+"v308",
+"age",
+"age_r",
+"age_r2",
+"v316",
+"v336_4",
+"v336",
+"v336_2",
+"v336_3",
+"v336_cs",
+"v336_r",
+
+"v337",
+"v338",
+
+"v353WK",
+"v353W_cs",
+"v353MM",
+"v353M_cs",
+"v353YR",
+"v353Y_cs",
+"v353_r",
+#Geocodes
+"v371b_N1",
+"v371b_N2", 
+"v371b_N3", 
+"v370", 
+#Variables about the Interview  
+"v374",
+"v373a",
+"v373b", 
+"v374a", 
+"v374b", 
+"v374c", 
+"v372", 
+"v375", 
+"v377", 
+"v378"
+)]
+
+write.csv(evs_sub,"~/Desktop/MZES/Daniel/Datasets/Terrorism_migration/evs_sub.csv", row.names = FALSE)
+
+```
+
+
+
+*Afrobarometer Round 1:*
+#technical variables
+respno
+refnumb
+casenumb
+country
+
+#demographic variables
+supdem - Support for democracy
+occup – Occupation
+gender
+age
+educ
+race
+language
+unemp 
+urbrur  - Urban or rural
+povfoo - Gone without food
+povinc  - Gone without cash income 
+sctrust - General trust
+scint - Interested in politics
+scdsc - Discuss politics
+
+#Social identity
+gidprd - Proud of identity group 
+gidbes  - Own identity group best
+gidstr- Stronger ties to own identity group
+
+#Satisfaction with life
+pfesol  - Present vs. past: living standards
+pfenow  - Satisfied with state of national economy
+pfepas  - Present vs. past: satisfaction with economic/life conditions
+pfegrp  - Identity group economic conditions compared to others
+pfpcrm - Handling crime
+pfpsaf  - Present vs. past: safety
+mip1 - Most important problems – 1
+mip2  - Most important problems – 2
+leggov - Government has right to make authoritative decisions
+
+#membership of religious group
+memrel - Member/attends religious group
+
+#political identity
+pidcls - Close to party
+pidwin- Close to ruling party or opposition
+parvot - Voted in last elections
+
+#geographic location
+"area" - District/County/Province/Region
+"region"
+"locationlevel1"   
+"locationlevel2"       
+"townvill"             
+"eanumb"    
+"uniqueea"
+"geoname_id"           
+"precision_code"
+"place_name"           
+"latitude"             
+"longitude" 
+"location_type_code"   
+"geoname_adm_code"     
+"geoname_adm_name" 
+"location_class"       
+"geographic_exactness"
+
+```{r afrobarometer round1}
+afro <- read.csv("afb_full_r1.csv")
+names(afro)
+
+afro_sub <- afro[,c(
+#technical variables
+"respno",
+"refnumb",
+"casenumb",
+"country",
+
+#demographic variables
+"supdem", 
+"occup", 
+"gender",
+"age",
+"educ",
+"race",
+"language",
+"unemp", 
+"urbrur",  
+"povfoo", 
+"povinc", 
+"sctrust",
+"scint",
+"scdsc", 
+
+#Social identity
+"gidprd",
+"gidbes", 
+"gidstr",
+
+#Satisfaction with life
+"pfesol",  
+"pfenow",  
+"pfepas",
+"pfegrp", 
+"pfpcrm",
+"pfpsaf", 
+"mip1", 
+"mip2",
+"leggov",
+
+#membership of religious group
+"memrel",
+
+#political identity
+"pidcls",
+"pidwin",
+"parvot", 
+
+#location/geocodes
+"area",
+"region",
+"locationlevel1",   
+"locationlevel2",      
+"townvill",             
+"eanumb",    
+"uniqueea",
+"geoname_id",           
+"precision_code",
+"place_name",           
+"latitude",         
+"longitude",
+"location_type_code",
+"geoname_adm_code",    
+"geoname_adm_name",
+"location_class",      
+"geographic_exactness"
+)]
+
+write.csv(afro_sub,"~/Desktop/MZES/Daniel/Datasets/Terrorism_migration/afro_sub.csv", row.names = FALSE)
+
+```
+
+
+```{r merged}
+#attempted merging but many NAs obviously 
+df_list <- list(wvs_sub, evs_sub, afro_sub)
+merged_data <-Reduce(function(x, y) merge(x, y, all=TRUE), df_list)
+
+```
+
