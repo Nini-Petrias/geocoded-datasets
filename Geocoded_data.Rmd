@@ -20,7 +20,9 @@ p_needed <-
     "MASS",
     "ggplot2",
     "dplyr",
-    "tidyr"
+    "tidyr", 
+    "haven", 
+    "tidyverse"
   )
 
 packages <- rownames(installed.packages())
@@ -143,7 +145,6 @@ WVS_W7 <- read.csv("WVS_Cross-National_Wave_7_csv_v4_0.csv")
 
 wvs_sub <- WVS_W7[,c(
 #Technical Variables:
-"doi", 
 "A_STUDY",
 "A_WAVE", 
 "A_YEAR", 
@@ -231,17 +232,22 @@ wvs_sub <- WVS_W7[,c(
 "Q290"
  )]
 
-#write.csv(wvs_sub,"~/Desktop/MZES/Daniel/Datasets/Terrorism_migration/wvs_sub.csv", row.names = FALSE)
+#add a column for source of study
+wvs_sub$source <- "wvs"
+
+#add a column of combination of letters and numbers to use as unique id in the merged data
+wvs_sub$id <- do.call(paste0, expand.grid(LETTERS[1:18], 1:4879))
+
+#write.csv(wvs_sub,"~/Desktop/MZES/Daniel/Datasets/geocoded-datasets/wvs_sub.csv", row.names = FALSE)
 
 ```
 
 
 Variables from EVS (European Values Study 2008: Integrated Dataset (EVS 2008) - Restricted Use File):
 *Technical Variables:*
-doi
-id_cocas - unified respondent number
-caseno - original respondent number (constructed)
-intno - interviewer number
+doi 
+id_cocas - unified respondent number (dropped cause it has no match in wvs)
+caseno - original respondent number (dropped cause it has no match in wvs)
 year - survey year
 country - country code
 country1 - country code [with split ups]
@@ -358,19 +364,12 @@ Time of interview: end hour v374a
 Time of interview: end minute v374b
 Time at the end of interview v374c
 Date interview   - v372
-Respondent interested during the interview v375
-Year/month of start-fieldwork - v377
-Year/month of end-fieldwork - v378
 
 ```{r EVS}
-evs_restricted <- read.dta("ZA4799_v1-0-0.dta")
+evs_restricted <- read_dta("ZA4799_v1-0-0.dta")
 
 evs_sub <- evs_restricted[,c(
 #Technical Variables
-"doi", 
-"id_cocas", #unified respondent number
-"caseno", #original respondent number
-"intno", 
 "year",
 "country", 
 "country1", 
@@ -476,13 +475,14 @@ evs_sub <- evs_restricted[,c(
 "v374a", 
 "v374b", 
 "v374c", 
-"v372", 
-"v375", 
-"v377", 
-"v378"
+"v372"
 )]
 
-#write.csv(evs_sub,"~/Desktop/MZES/Daniel/Datasets/Terrorism_migration/evs_sub.csv", row.names = FALSE)
+#add a column for source of study
+evs_sub$source <- "evs"
+evs_sub$id <- 1:nrow(evs_sub)
+
+#write.csv(evs_sub,"~/Desktop/MZES/Daniel/Datasets/geocoded-datasets/evs_sub.csv", row.names = FALSE)
 
 ```
 
@@ -625,15 +625,251 @@ afro_sub <- afro[,c(
 "geographic_exactness"
 )]
 
-#write.csv(afro_sub,"~/Desktop/MZES/Daniel/Datasets/Terrorism_migration/afro_sub.csv", row.names = FALSE)
+afro_sub$source <- "af_r1"
+#write.csv(afro_sub,"~/Desktop/MZES/Daniel/Datasets/geocoded-datasets/afro_sub.csv", row.names = FALSE)
+```
+
+
+*Afrobarometer Round 2:*
+#technical variables
+respno
+country
+backchk - Household back-checked?
+urbrur - Urban or Rural Primary Sampling Unit
+region/province
+prevint - Previous interview was with a male (1) or female (2)
+currint - This interview must be with a:male, female
+dateintr - Date of interview
+strtime - Time interview started
+
+#economic situation of a respondent 
+Q1B - how would you describe: Your own present living conditions?
+Q2B - how do you rate: Your living conditions compared to those of other {countrymen]?
+Q3B - how do you rate the following compared to twelve months ago:Your living conditions 12 months ago
+Q4B - Looking ahead, do you expect the following to be better or worse: Your living conditions in twelve months time?
+Q6A - On a scale between 0 and 10, where 0 are “poor” people and 10 are “rich” people: Which number would you give yourself today?
+Q6B - On a scale between 0 and 10, where 0 are “poor” people and 10 are “rich” people: Which number would you give your parents ten years ago?
+Q6C - On a scale between 0 and 10, where 0 are “poor” people and 10 are “rich” people: Which number do you expect your children to attain in the future?
+Q7A - Considering ALL the activities you engage in to secure a livelihood, how much do you depend on: Earning a wage or salary?
+Q9A - How often gone without food
+Q9B - How often gone without water
+Q9C - How often gone without medical care
+
+#crime experiences 
+Q11A - How often feared crime in home
+Q11B - How often something stolen from home
+Q11C - How often physically attacked
+
+#association membership
+Q24A - Member of religious group
+Q24B - Member of trade union or farmers association
+Q24C - Member of professional or business association
+Q24D - Member of community development association
+
+#political activities
+Q25A - Discuss politics
+Q25B - Attend a community meeting
+Q25C - Got together with others to raise an issue?
+Q25D - Attend a demonstration or protest march
+Q25E - Used force or violence for political cause
+
+#news literacy
+Q26A - Radio news
+Q26B - Television news
+Q26C - Newspaper news
+Q27 - Interest in public affairs
+Q28A - Politics and government too complicated
+
+#most important problems
+Q44PT1 - Most important problems – 1st response
+Q44PT2 - Most important problems – 2nd response
+Q44PT3 - Most important problems – 3rd response
+
+#background
+Q54 - Identity group
+Q55 - Identity group’s economic conditions
+Q56 - Identity group treated unfairly
+Q58A - Difficulty to obtain identity document
+
+#attitudes regarding violence, corruption, clientalism (can be used as indirect measures of authoritarian values)
+Q74 - Right to beat vs. no use of violence
+Q75 - Turn to police vs. take revenge
+Q76 - Violence never justified vs. sometimes necessary
+Q77 - Country should remain united vs. country should break apart
+
+#demographic variables
+Q80 - age
+Q85 - Religion of respondent
+Q86 - How often attend religious services
+Q87A - Close to political party
+Q87B - How close to this political party
+Q88 - Main occupation
+Q89 - Employment status
+Q90 - Household income
+Q90NEW - Household income
+Q96 - Gender of respondent
+Q96NEW - Race of respondent
+
+
+```{r afrobarometer round 2}
+#Round 2 Afrobarometer data and variables for geographic location
+#names(afb_full_r2)
+
+afro_sub2 <- afb_full_r2[,c(
+#technical variables
+"respno",
+"country",
+"backchk",  
+"urbrur",
+"prevint", 
+"currint",  
+"dateintr", 
+"strtime", 
+
+#economic situation of a respondent 
+"q1b", 
+"q2b", 
+"q3b",  
+"q4b", 
+"q6a",
+"q6b", 
+"q6c", 
+"q7a", 
+"q9a",
+"q9b", 
+"q9c", 
+
+#crime experiences 
+"q11a", 
+"q11b", 
+"q11c", 
+
+#association membership
+"q24a", 
+"q24b", 
+"q24c", 
+"q24d", 
+
+#political activities
+"q25a",
+"q25b", 
+"q25c", 
+"q25d", 
+"q25e", 
+
+#news literacy
+"q26a",
+"q26b", 
+"q26c", 
+"q27", 
+"q28a", 
+
+#most important problems 
+"q44pt1", 
+"q44pt2", 
+"q44pt3", 
+
+#background
+"q54", 
+"q55",
+"q56", 
+"q58a", 
+
+#attitudes regarding violence, corruption, clientalism (can be used as indirect measures of authoritarian values)
+"q74", 
+"q75", 
+"q76", 
+"q77", 
+
+#demographic variables
+"q80",
+"q85",
+"q86",
+"q87a",
+"q87b",
+"q88",
+"q89",
+"q90",
+"q90new",
+"q96",
+"q96new",
+
+#location/geocodes
+"region",
+"locationlevel1",   
+"locationlevel2",  
+"locationlevel3",      
+"locationlevel4",   
+"location_type_code", 
+"townvill",             
+"eanumb",    
+"uniqueea",
+
+"geoname_id",           
+"precision_code",
+"place_name",           
+"latitude",         
+"longitude",
+"location_type_code",
+"geoname_adm_code",    
+"geoname_adm_name",
+"location_class",      
+"geographic_exactness"
+)]
+
+#adding a colunm for source of study
+#afro_sub2$source <- "af_r2"
+
+#which( colnames(afro_sub2)=="source" )
+
+#write.csv(afro_sub2,"~/Desktop/MZES/Daniel/Datasets/geocoded-datasets/afro_sub2.csv", row.names = FALSE)
 
 ```
 
 
+*Merging datasets*
+
 ```{r merged}
-#attempted merging but many NAs obviously 
-df_list <- list(wvs_sub, evs_sub, afro_sub)
-merged_data <-Reduce(function(x, y) merge(x, y, all=TRUE), df_list)
+#merging wvs and evs 
+df = merge(x=wvs_sub ,y=evs_sub,by="source",all=TRUE) #merges by study 
+table(df$source)
+
+#merging afrobarometer data
+#unique ID is respno.x for afro_sub and respno.y for afrom_sub2
+df2 = merge(x=afro_sub ,y=afro_sub2,by="source",all=TRUE) #merges by study 
+
+```
+
+
+```{r}
+#merging all datasets into a final data file
+df3 =merge(x=df ,y=df2,by="source",all=TRUE) #merges by source 
+
+#to check if all went smoothly
+table(df3$source)
+
+#write.csv(df3,"~/Desktop/MZES/Daniel/Datasets/geocoded-datasets/df3.csv", row.names = FALSE)
+
+```
+
+*Harmonizing merged dataset*
+
+```{r}
+#unique id
+which( colnames(df3)=="respno.y" )
+
+#id wvs
+df3$id.x #11 
+#id evs 
+df3$id.y #8 
+#afrobarometer r1 id
+df3$respno.x #9
+#afrobarometer r2 id
+df3$respno.y #10
+
+#rearange id variable 
+df3 <- df3[,c(1, 11, 8, 9, 10, 2:7,  12:ncol(df3))] 
+
 
 ```
 
