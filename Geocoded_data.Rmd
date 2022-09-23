@@ -38,7 +38,6 @@ sapply(p_needed, require, character.only = TRUE)
 
 Variables from WVS Wave 7 (81 variables out of 552):
 *Technical Variables:*
-DOI 
 A_STUDY - 1.- EVS 2.- WVS
 A_WAVE - 5.- EVS wave 5 (2017-2020); 7.- WVS wave 7 (2017-2022)
 A_YEAR 
@@ -49,13 +48,14 @@ J_INTDATE  - Date of interview (Numeric variable recorded in format: YYYYMMDD)
 FW_END  - Year/month of end-fieldwork 
 FW_START -  Year/month of start-fieldwork
 K_TIME_START - Start time of the interview [HH.MM] 
-K_TIME_END - Start time of the interview [HH.MM]
-K_DURATION - End time of the interview [HH.MM]
+K_TIME_END - End time of the interview [HH.MM]
+K_DURATION - Duration time of the interview [HH.MM]
 Q_MODE - Mode of data collection
 N_REGION_ISO - Region ISO 3166-2
 N_REGION_WVS - Region country specific 
 N_REGION_NUTS2 - *this variable is not in the data only in the questionnaire*
 N_TOWN - Settlement name 
+H_URBRURAL 
 G_TOWNSIZE - Settlement size_8 groups 
 G_TOWNSIZE2 - Settlement size_5 groups 
 H_SETTLEMENT - Settlement type 
@@ -68,17 +68,33 @@ E1_LITERACY - Respondent’s literacy
 F_INTPRIVACY - Interview privacy 
 S025 - Country – year 
 
+#indirect measure of authoritarian values used in kalkan et al 2009
+Q7 - Important child qualities: Good manners 
+Q12 - Important child qualities: Tolerance and respect for other people
+Q17 - Important child qualities: obedience
+
 *Social values, attitudes:*
 #On this list are various groups of people. Could you please mention any that you would not like to have as neighbors?
 Q19 People of a different race
 Q21 Immigrants/foreign workers
+Q23 People of a different religion 
 Q26 People who speak a different language
+
 Q34 When jobs are scarce, employers should give priority to people of this country over immigrants
+Q42 Basic kinds of attitudes concerning society
+Q46 Feeling of happiness 
+Q47 State of health (subjective) 
+Q48 How much freedom of choice and control
 Q49 All things considered, how satisfied are you with your life as a whole these days? Using this card on which 1 means you are “completely dissatisfied” and 10 means you are “completely satisfied” where would you put your satisfaction with your life as a whole? 
+
+Q57 - Most people can be trusted
+Q106 - Income equality 
+Q149 - Freedom or equality
+Q199 - Interest in politics
 
 *Economic Situation:*
 Q50. How satisfied are you with the financial situation of your household?
-#In the last 12 months, how often have your or your family…?
+#In the last 12 months, how often have you or your family…?
 Q51 - Gone without enough food to eat
 Q52 - Felt unsafe from crime in your home
 Q53 - Gone without medicine or medical treatment that you needed
@@ -113,12 +129,18 @@ Do you think that your country’s government should or should not have the righ
 Q196 - Keep people under video surveillance in public areas  
 Q197 - Monitor all e-mails and any other information exchanged on the Internet 
 Q198 - Collect information about anyone living in this country without their knowledge 
+Q200 - Discuss Politics
+
+*News literacy:*
+Q201 - Newspaper news
+Q202 - Television news
+Q203 - Radio news
 
 *Control Variables:*
 Q223 – Voting for which party?
 Q240 – L-R self-placement
 
-Demographics: 
+*Demographics:* 
 Q260- Respondent’s sex (1 -m, 2 - f)
 Q261 - Can you tell me your year of birth, please?
 Q262 - This means you are _______ years old (write in age in two digits).
@@ -128,16 +150,16 @@ Q266-268. In which country were you, your father and your mother (or those who r
 Q269 - Are you a citizen of this country?
 Q273 – married?
 Q274 - Do you have any children?
+Q279 - Are you employed now or not? If yes, about how many hours a week? If more than one job: only for the main job.
+Q94 - is an active or inactive member of a religious group
+Q288 - Monthly household income (same scale as afrobarometer R2 but without 0))
+Q289 - Do you belong to a religion or religious denomination? If yes, which one? (different scale in each survey)
+Q290 - Respondent’s ethnic group
 #What is the highest educational level that you, your spouse, your mother and your father have attained? 
 Q275 - Respondent;
 Q276 - Spouse; 
 Q277 - Mother;
 Q278 - Father
-Q279. Are you employed now or not? If yes, about how many hours a week? If more than one job: only for the main job.
-Q280. Is your spouse employed? In his/her LAST job was he/she employed (either full time or part time) or was he/she self-employed?
-Q287. People sometimes describe themselves as belonging to the working class, the middle class, or the upper or lower class. Would you describe yourself as belonging to the..
-Q289. Do you belong to a religion or religious denomination? If yes, which one?
-Q290. Respondent’s ethnic group
 
 
 ```{r wvs wave 7}
@@ -145,39 +167,51 @@ WVS_W7 <- read.csv("WVS_Cross-National_Wave_7_csv_v4_0.csv")
 
 wvs_sub <- WVS_W7[,c(
 #Technical Variables:
-"A_STUDY",
-"A_WAVE", 
 "A_YEAR", 
 "B_COUNTRY", 
 "B_COUNTRY_ALPHA", 
-"D_INTERVIEW", 
+#"D_INTERVIEW", 
 "J_INTDATE", 
-"FW_END",   
-"FW_START", 
-"K_TIME_START", 
-"K_TIME_END",
-"K_DURATION", 
-"Q_MODE", 
-"N_REGION_ISO", 
-"N_REGION_WVS", 
-"N_TOWN", 
-"G_TOWNSIZE", 
-"G_TOWNSIZE2", 
-"H_SETTLEMENT", 
+#"FW_END",   
+#"FW_START", 
+#"K_TIME_START", 
+#"K_TIME_END",
+#"K_DURATION", 
+#"Q_MODE", 
+#"N_REGION_ISO", 
+#"N_REGION_WVS", 
+#"N_TOWN", 
+#"G_TOWNSIZE", 
+#"G_TOWNSIZE2", 
+#"H_SETTLEMENT", 
+#"H_URBRURAL",
 "H_URBRURAL",
 "O1_LONGITUDE",  
 "O2_LATITUDE", 
-"S_INTLANGUAGE",    
-"E_RESPINT",
-"E1_LITERACY" , 
-"F_INTPRIVACY", 
-"S025", 
+#"S_INTLANGUAGE",    
+#"E_RESPINT",
+#"E1_LITERACY" , 
+#"F_INTPRIVACY", 
+#"S025", 
+#authoritarian values
+"Q7", 
+"Q12", 
+"Q17", 
 #Social values, attitudes
 "Q19", 
-"Q21", 
+"Q21",
+"Q23", 
 "Q26", 
 "Q34", 
+"Q42",
+"Q46", 
+"Q47", 
+"Q48", 
 "Q49", 
+"Q57", 
+"Q106",
+"Q149",
+"Q199",
 #Economic Situation
 "Q50", 
 "Q51", 
@@ -206,11 +240,17 @@ wvs_sub <- WVS_W7[,c(
 "Q196", 
 "Q197", 
 "Q198", 
+"Q200", 
+#news literacy
+"Q201", 
+"Q202",
+"Q203",
 #Control Variables: 
 "Q223", 
 "Q240", 
+#Demographics:
 "Q260", 
-"Q261", 
+#"Q261", 
 "Q262", 
 "Q263", 
 "Q264",
@@ -221,22 +261,23 @@ wvs_sub <- WVS_W7[,c(
 "Q269",
 "Q273",
 "Q274",
-"Q275",
-"Q276",
-"Q277",
-"Q278",
 "Q279",
-"Q280",
-"Q287",
-"Q289",
-"Q290"
+"Q94",
+"Q288",
+#"Q289",
+"Q290",
+#education
+"Q275"
+#"Q276",
+#"Q277",
+#"Q278"
  )]
 
 #add a column for source of study
 wvs_sub$source <- "wvs"
 
 #add a column of combination of letters and numbers to use as unique id in the merged data
-wvs_sub$id <- do.call(paste0, expand.grid(LETTERS[1:18], 1:4879))
+wvs_sub$id <- do.call(paste0, expand.grid(LETTERS[1:18], 1:4879)) #unique identifier 
 
 #write.csv(wvs_sub,"~/Desktop/MZES/Daniel/Datasets/geocoded-datasets/wvs_sub.csv", row.names = FALSE)
 
@@ -245,7 +286,6 @@ wvs_sub$id <- do.call(paste0, expand.grid(LETTERS[1:18], 1:4879))
 
 Variables from EVS (European Values Study 2008: Integrated Dataset (EVS 2008) - Restricted Use File):
 *Technical Variables:*
-doi 
 id_cocas - unified respondent number (dropped cause it has no match in wvs)
 caseno - original respondent number (dropped cause it has no match in wvs)
 year - survey year
@@ -259,10 +299,11 @@ c_abrv1 - country abbreviation [with split ups]
 #Respondent specific questions:
 Feeling of happiness - v8
 State of health (subjective) - v9
-Neighbours: People with a criminal record - v46
-Neighbours: People of a different race - v47
-Neighbours: Muslims - v53
+
+Neighbours: People of a different race - v47 
+Neighbours: Muslims - v53 
 Neighbours: Immigrants/foreign workers - v54
+
 Most people can be trusted - v62
 Satisfaction with your life -  v66
 How much freedom of choice and control - v65
@@ -272,25 +313,32 @@ Jobs scarce: Employers should give priority to (nation) people than immigrants -
 Employed - v89
 Job satisfaction -  v90
 
-#Politics and Society
+#indirect measure of authoritarian values used in kalkan et al 2009
+Important child qualities: Good manners - v170
+Important child qualities: Tolerance and respect for other people - v175
+Important child qualities: obedience - v180
+
+#Politics and Society (has matching variable in wvs)
 Interest in politics - v186
 Freedom or equality - v192
 Self-positioning in political scale - v193
 Basic kinds of attitudes concerning society - v200
 Income equality - v198
 Immigrant policy - v266
+Which political party would you vote for: First choice (EVS) - v264
+Opinion on terrorism - v267
+#does not have matching variable in wvs
 How often follows politics in the news - v281
 Give authorities information to help justice - v282
 Stick to own affairs - v283
 Feel concerned about: Immigrants - v292
 Would you vote at a general election tomorrow - v263
-Which political party would you vote for: First choice (EVS) - v264
 Which political party would you vote for - left/right scale - v264_LR
-Opinion on terrorism - v267
 
 #Religion
-Statement: good/evil, clear/no clear guidelines - v104
 Belong to religious denomination - v105
+Belong to which religious denomination - v106 (different scale in every survey)
+#authoritarian values
 Justifiable: death penalty - v252
 
 #National Identity 
@@ -303,14 +351,9 @@ Immigrants will become a threat to society v272
 Immigrants maintain own/take over customs v273
 Immigrants living in your country: feels like a stranger v274
 Immigrants living in your country: there are too many v275
-EU fears: loss of social security v257
-EU fears: lose national identity/culture v258
-EU fears: loss of jobs v261
 
 #Respondents' Parents
-Father born in [country] v309
 Fathers country of birth - ISO 3166-1 code v310b
-Mother born in [country] v311
 Mothers country of birth - ISO 3166-1 code v312b
 Highest educational level attained father/mother (8 categories) - v355_4
 
@@ -318,11 +361,10 @@ Highest educational level attained father/mother (8 categories) - v355_4
 Partner/spouse born in [country] v342 
 Spouse/partners country of birth - ISO 3166-1code - v343b
 Highest educational level attained spouse partner (8 categories)  - v344_4
-Educational level partner (recoded) v344_r
 
 #Socio demographics
 Sex v302
-Year of birth birthy v303
+Year of birth v303
 Having [country s] nationality v304
 Respondents nationality - ISO 3166-1 code v305b
 Respondent born in [country] v306
@@ -331,6 +373,8 @@ Year in which respondent came to live in [country]  - v308
 Age - age
 Age recoded - age_r
 Age recoded (3 intervals) - age_r2
+marital status v313 
+Do you have any children? v321
 Stable relationship - v316
 Highest educational level attained - v336_4
 Educational level respondent: ISCED- code one digit - v336
@@ -344,7 +388,7 @@ Employment/self-employment: last job v338
 
 Weekly household income v353WK
 Weekly household income (country specific) v353W_cs
-Monthly household income v353MM
+Monthly household income v353MM (uses different scale from WVS and R2)
 Monthly household income (country specific) v353M_cs
 Annual household income v353YR
 Annual household income (country specific) v353Y_cs
@@ -372,15 +416,14 @@ evs_sub <- evs_restricted[,c(
 #Technical Variables
 "year",
 "country", 
-"country1", 
+#"country1", 
 "c_abrv",    
-"c_abrv1", 
-"cntry_y",
-"cntry1_y",
+#"c_abrv1", 
+#"cntry_y",
+#"cntry1_y",
 #Respondent specific questions:
 "v8", 
 "v9", 
-"v46", 
 "v47", 
 "v53", 
 "v54", 
@@ -391,6 +434,10 @@ evs_sub <- evs_restricted[,c(
 "v102",
 "v89", 
 "v90", 
+#indirect measure of authoritarian values used in kalkan et al 2009
+"v170", 
+"v175", 
+"v180", 
 #Politics and Society
 "v186", 
 "v192", 
@@ -398,17 +445,17 @@ evs_sub <- evs_restricted[,c(
 "v200", 
 "v198",
 "v266",
-"v281",
-"v282",
-"v283",
-"v292",
-"v263",
+#"v281",
+#"v282",
+#"v283",
+#"v292",
+#"v263",
 "v264",
 "v264_LR",
 "v267",
 #Religion
-"v104",
-"v105",
+"v105", 
+#"v106",
 "v252",
 #National Identity 
 "v255",
@@ -420,72 +467,67 @@ evs_sub <- evs_restricted[,c(
 "v273",
 "v274",
 "v275",
-"v257",
-"v258",
-"v261",
 #Respondents' Parents
-"v309",
 "v310b",
-"v311",
 "v312b",
-"v355_4",
+#"v355_4",
 #Partner
-"v342", 
-"v343b",
-"v344_4",
-"v344_r",
+#"v342", 
+#"v343b",
+#"v344_4",
 #Socio demographics
 "v302",
-"v303",
-"v304",
-"v305b",
-"v306",
+#"v303",
+#"v304",
+#"v305b",
+#"v306",
 "v307b",
-"v308",
+#"v308",
 "age",
-"age_r",
-"age_r2",
-"v316",
+#"age_r",
+#"age_r2",
+"v313",
+"v321",
+#"v316",
 "v336_4",
-"v336",
-"v336_2",
-"v336_3",
-"v336_cs",
-"v336_r",
+#"v336",
+#"v336_2",
+#"v336_3",
+#"v336_cs",
+#"v336_r",
 
 "v337",
-"v338",
-
-"v353WK",
-"v353W_cs",
+#"v338",
+#Weekly household income
+#"v353WK",
+#"v353W_cs",
 "v353MM",
-"v353M_cs",
-"v353YR",
-"v353Y_cs",
-"v353_r",
+#"v353M_cs",
+#"v353YR",
+#"v353Y_cs",
+#"v353_r",
 #Geocodes
 "v371b_N1",
 "v371b_N2", 
 "v371b_N3", 
-"v370", 
+#"v370", 
 #Variables about the Interview  
-"v374",
-"v373a",
-"v373b", 
-"v374a", 
-"v374b", 
-"v374c", 
+#"v374",
+#"v373a",
+#"v373b", 
+#"v374a", 
+#"v374b", 
+#"v374c", 
 "v372"
 )]
 
 #add a column for source of study
 evs_sub$source <- "evs"
-evs_sub$id <- 1:nrow(evs_sub)
+evs_sub$id <- 1:nrow(evs_sub) #unique identifier 
 
 #write.csv(evs_sub,"~/Desktop/MZES/Daniel/Datasets/geocoded-datasets/evs_sub.csv", row.names = FALSE)
 
 ```
-
 
 
 *Afrobarometer Round 1:*
@@ -507,6 +549,7 @@ unemp
 urbrur  - Urban or rural
 povfoo - Gone without food
 povinc  - Gone without cash income 
+povhth - Gone without healthcare 
 sctrust - General trust
 scint - Interested in politics
 scdsc - Discuss politics
@@ -518,22 +561,30 @@ gidstr- Stronger ties to own identity group
 
 #Satisfaction with life
 pfesol  - Present vs. past: living standards
-pfenow  - Satisfied with state of national economy
+pfenow  - Satisfied with state of national economy (no match)
 pfepas  - Present vs. past: satisfaction with economic/life conditions
 pfegrp  - Identity group economic conditions compared to others
-pfpcrm - Handling crime
-pfpsaf  - Present vs. past: safety
+pfrfai -  Identity group treated unfairly
+pfpcrm - Handling crime (no match)
+pfpsaf  - Present vs. past: safety (no match))
+pfrvot - voting freedom 
 mip1 - Most important problems – 1
 mip2  - Most important problems – 2
-leggov - Government has right to make authoritative decisions
+leggov - Government has right to make authoritative decisions (no match)
 
 #membership of religious group
 memrel - Member/attends religious group
 
 #political identity
-pidcls - Close to party
-pidwin- Close to ruling party or opposition
-parvot - Voted in last elections
+pidcls - Close to party (binary)
+pidwin- Close to ruling party or opposition (binary)
+parvot - Voted in last elections (has no match in other studies)
+scund - Politics and government too complicated
+
+#news literacy
+medrad - Radio news
+medtv - tv 
+mednew - Newspapers
 
 #geographic location
 "area" - District/County/Province/Region
@@ -556,27 +607,27 @@ parvot - Voted in last elections
 
 ```{r afrobarometer round1}
 afro <- read.csv("afb_full_r1.csv")
-names(afro)
 
 afro_sub <- afro[,c(
 #technical variables
-"respno",
-"refnumb",
-"casenumb",
+"respno", #unique identifier 
+#"refnumb",
+#"casenumb",
 "country",
 
 #demographic variables
-"supdem", 
-"occup", 
+#"supdem", 
+#"occup", 
 "gender",
 "age",
 "educ",
 "race",
-"language",
+#"language",
 "unemp", 
 "urbrur",  
 "povfoo", 
 "povinc", 
+"povhth",
 "sctrust",
 "scint",
 "scdsc", 
@@ -588,41 +639,48 @@ afro_sub <- afro[,c(
 
 #Satisfaction with life
 "pfesol",  
-"pfenow",  
+#"pfenow",  
 "pfepas",
 "pfegrp", 
-"pfpcrm",
-"pfpsaf", 
+"pfrfai",
+#"pfpcrm",
+#"pfpsaf", 
+"pfrvot", 
 "mip1", 
 "mip2",
-"leggov",
+#"leggov",
 
 #membership of religious group
 "memrel",
 
 #political identity
-"pidcls",
-"pidwin",
-"parvot", 
+"pidcls", #(binary)
+"pidwin", #(binary)
+#"parvot",
+"scund", 
 
+#news literacy
+"medrad", 
+"medtv", 
+"mednew", 
 #location/geocodes
-"area",
-"region",
-"locationlevel1",   
-"locationlevel2",      
-"townvill",             
-"eanumb",    
-"uniqueea",
-"geoname_id",           
-"precision_code",
-"place_name",           
+#"area",
+#"region",
+#"locationlevel1",   
+#"locationlevel2",      
+#"townvill",             
+#"eanumb",    
+#"uniqueea",
+#"geoname_id",           
+#"precision_code",
+#"place_name",           
 "latitude",         
-"longitude",
-"location_type_code",
-"geoname_adm_code",    
-"geoname_adm_name",
-"location_class",      
-"geographic_exactness"
+"longitude"
+#"location_type_code",
+#"geoname_adm_code",    
+#"geoname_adm_name",
+#"location_class",      
+#"geographic_exactness"
 )]
 
 afro_sub$source <- "af_r1"
@@ -644,7 +702,7 @@ strtime - Time interview started
 
 #economic situation of a respondent 
 Q1B - how would you describe: Your own present living conditions?
-Q2B - how do you rate: Your living conditions compared to those of other {countrymen]?
+Q2B - how do you rate: Your living conditions compared to those of other (countrymen)?
 Q3B - how do you rate the following compared to twelve months ago:Your living conditions 12 months ago
 Q4B - Looking ahead, do you expect the following to be better or worse: Your living conditions in twelve months time?
 Q6A - On a scale between 0 and 10, where 0 are “poor” people and 10 are “rich” people: Which number would you give yourself today?
@@ -654,11 +712,12 @@ Q7A - Considering ALL the activities you engage in to secure a livelihood, how m
 Q9A - How often gone without food
 Q9B - How often gone without water
 Q9C - How often gone without medical care
+q9f - How often gone without cash income
 
 #crime experiences 
 Q11A - How often feared crime in home
-Q11B - How often something stolen from home
-Q11C - How often physically attacked
+Q11B - How often something stolen from home (has no match)
+Q11C - How often physically attacked (has no match)
 
 #association membership
 Q24A - Member of religious group
@@ -696,103 +755,21 @@ Q74 - Right to beat vs. no use of violence
 Q75 - Turn to police vs. take revenge
 Q76 - Violence never justified vs. sometimes necessary
 Q77 - Country should remain united vs. country should break apart
+Q36D - voting freedom
 
 #demographic variables
 Q80 - age
-Q85 - Religion of respondent
+Q84 - What is the highest level of education you have completed?
+Q85 - Religion of respondent (uses different scale in each survey)
 Q86 - How often attend religious services
 Q87A - Close to political party
 Q87B - How close to this political party
 Q88 - Main occupation
 Q89 - Employment status
 Q90 - Household income
-Q90NEW - Household income
+Q90NEW - Household income (country specific)
 Q96 - Gender of respondent
 Q96NEW - Race of respondent
-
-
-```{r afrobarometer round 2}
-#Round 2 Afrobarometer data and variables for geographic location
-#names(afb_full_r2)
-
-afro_sub2 <- afb_full_r2[,c(
-#technical variables
-"respno",
-"country",
-"backchk",  
-"urbrur",
-"prevint", 
-"currint",  
-"dateintr", 
-"strtime", 
-
-#economic situation of a respondent 
-"q1b", 
-"q2b", 
-"q3b",  
-"q4b", 
-"q6a",
-"q6b", 
-"q6c", 
-"q7a", 
-"q9a",
-"q9b", 
-"q9c", 
-
-#crime experiences 
-"q11a", 
-"q11b", 
-"q11c", 
-
-#association membership
-"q24a", 
-"q24b", 
-"q24c", 
-"q24d", 
-
-#political activities
-"q25a",
-"q25b", 
-"q25c", 
-"q25d", 
-"q25e", 
-
-#news literacy
-"q26a",
-"q26b", 
-"q26c", 
-"q27", 
-"q28a", 
-
-#most important problems 
-"q44pt1", 
-"q44pt2", 
-"q44pt3", 
-
-#background
-"q54", 
-"q55",
-"q56", 
-"q58a", 
-
-#attitudes regarding violence, corruption, clientalism (can be used as indirect measures of authoritarian values)
-"q74", 
-"q75", 
-"q76", 
-"q77", 
-
-#demographic variables
-"q80",
-"q85",
-"q86",
-"q87a",
-"q87b",
-"q88",
-"q89",
-"q90",
-"q90new",
-"q96",
-"q96new",
 
 #location/geocodes
 "region",
@@ -815,12 +792,117 @@ afro_sub2 <- afb_full_r2[,c(
 "geoname_adm_name",
 "location_class",      
 "geographic_exactness"
+
+```{r afrobarometer round 2}
+#Round 2 Afrobarometer data and variables for geographic location
+
+afro_sub2 <- afb_full_r2[,c(
+#technical variables
+"respno", #unique identifier 
+"country",
+#"backchk",  
+"urbrur",
+#"prevint", 
+#"currint",  
+"dateintr", 
+#"strtime", 
+
+#economic situation of a respondent 
+"q1b", 
+#"q2b", 
+"q3b",  
+#"q4b", 
+#"q6a",
+#"q6b", 
+#"q6c", 
+#"q7a", 
+"q9a",
+"q9b", 
+"q9c", 
+"q9f",
+
+#crime experiences 
+"q11a", 
+#"q11b", 
+#"q11c", 
+
+#association membership
+"q24a", 
+#"q24b", 
+#"q24c", 
+#"q24d", 
+
+#political activities
+"q25a",
+#"q25b", 
+#"q25c", 
+#"q25d", 
+#"q25e", 
+
+#news literacy
+"q26a",
+"q26b", 
+"q26c", 
+"q27", 
+"q28a", 
+
+#most important problems 
+"q44pt1", 
+"q44pt2", 
+"q44pt3", 
+
+#background
+"q54", 
+"q55",
+"q56", 
+#"q58a", 
+
+#attitudes regarding violence, corruption, clientalism (can be used as indirect measures of authoritarian values)
+#"q74", 
+#"q75", 
+#"q76", 
+#"q77", 
+"q36d",
+
+#demographic variables
+"q80",
+"q84", 
+#"q85",
+"q86",
+"q87a",
+"q87b",
+"q88",
+"q89",
+"q90",
+#"q90new",
+"q96",
+"q96new",
+
+#location/geocodes
+#"region",
+#"locationlevel1",   
+#"locationlevel2",  
+#"locationlevel3",      
+#"locationlevel4",   
+#"location_type_code", 
+#"townvill",             
+#"eanumb",    
+#"uniqueea",
+
+#"geoname_id",           
+#"precision_code",
+#"place_name",           
+"latitude",         
+"longitude"
+#"location_type_code",
+#"geoname_adm_code",    
+#"geoname_adm_name",
+#"location_class",      
+#"geographic_exactness"
 )]
 
 #adding a colunm for source of study
-#afro_sub2$source <- "af_r2"
-
-#which( colnames(afro_sub2)=="source" )
+afro_sub2$source <- "af_r2"
 
 #write.csv(afro_sub2,"~/Desktop/MZES/Daniel/Datasets/geocoded-datasets/afro_sub2.csv", row.names = FALSE)
 
@@ -832,44 +914,651 @@ afro_sub2 <- afb_full_r2[,c(
 ```{r merged}
 #merging wvs and evs 
 df = merge(x=wvs_sub ,y=evs_sub,by="source",all=TRUE) #merges by study 
-table(df$source)
 
-#merging afrobarometer data
+#merging afrobarometer data both rounds
 #unique ID is respno.x for afro_sub and respno.y for afrom_sub2
 df2 = merge(x=afro_sub ,y=afro_sub2,by="source",all=TRUE) #merges by study 
+
+#check if respondent numbers are unique across these two datasets --> they are
+all.equal(df2$respno.x, df2$respno.y)
 
 ```
 
 
 ```{r}
 #merging all datasets into a final data file
-df3 =merge(x=df ,y=df2,by="source",all=TRUE) #merges by source 
+df3 =merge(x=df2 ,y=df, by="source",all=TRUE) #merges by source 
 
-#to check if all went smoothly
+#to check if all went well
 table(df3$source)
-
-#write.csv(df3,"~/Desktop/MZES/Daniel/Datasets/geocoded-datasets/df3.csv", row.names = FALSE)
-
 ```
 
 *Harmonizing merged dataset*
 
 ```{r}
-#unique id
-which( colnames(df3)=="respno.y" )
+#unique identifier of all surveys in one column; 
+#for af_r1, af_r2 and wvs unique id is the combination of letters and numbers, for evs it is only numbers.
+df3$id.y <- as.character(df3$id.y)
 
-#id wvs
-df3$id.x #11 
-#id evs 
-df3$id.y #8 
-#afrobarometer r1 id
-df3$respno.x #9
-#afrobarometer r2 id
-df3$respno.y #10
+df3$id_all <- with(df3, coalesce(respno.x, respno.y,id.x,id.y))
 
-#rearange id variable 
-df3 <- df3[,c(1, 11, 8, 9, 10, 2:7,  12:ncol(df3))] 
+#deleted the separate columns:
+df3$respno.x <- NULL
+df3$respno.y <- NULL
+df3$id.x <- NULL
+df3$id.y <- NULL
 
+#harmonizing date column
+class(df3$v372) #class=date --> reference variable
+class(df3$J_INTDATE) #was integer -> turned into date class
+class(df3$dateintr) #was character 
+
+#turn the original date variables into harmonized date type
+library(lubridate)
+df3$J_INTDATE <- ymd(df3$J_INTDATE) #date variable from wvs
+df3$dateintr2 <- parse_date_time(df3$dateintr, c("%d-%b-%y")) #from af-r2; 800 failed to parse
+
+#combine all date columns into one and delete the leftover individual columns
+df3$interview_date <- with(df3, coalesce(v372, J_INTDATE, dateintr2))
+
+df3$dateintr <- NULL
+df3$dateintr2 <- NULL
+df3$J_INTDATE <- NULL
+df3$v372 <- NULL
+
+#checking if it worked
+table(is.na(df3$interview_date)) #21531 from af-r1 that did not have date variable + 800 failed to parse = 29140 NAs in total
+
+#harmonize gender variables and combine in one column (1-male, 2-female)
+#turn charachter variables into numeric
+df3$v302 <- as.integer(df3$v302)
+df3$q96 <- as.integer(df3$q96)
+#combine into a  new column
+df3$gender <- with(df3, coalesce(Q260, v302, gender, q96)) #do not delete gender
+#delete original columns
+df3$Q260 <- NULL
+df3$v302 <- NULL
+df3$q96 <- NULL
+
+#harmonize age
+#turn charachter variables into numeric
+df3$age.x <- as.integer(df3$age.x)
+df3$q80 <- as.integer(df3$q80)
+#combine
+df3$age_all <- with(df3, coalesce(Q262, age.x, age.y, q80))
+#delete
+df3$Q262 <- NULL
+df3$age.x <- NULL
+df3$age.y <- NULL
+df3$q80 <- NULL
+
+#combine latitude and longitude variables for all surveys except evs (evs has NUTS-levels only)
+df3$latitude_all <- with(df3, coalesce(O2_LATITUDE, latitude.x, latitude.y))
+
+df3$longitude.all <- with(df3, coalesce(O1_LONGITUDE, longitude.x, longitude.y))
+
+#delete
+df3$O2_LATITUDE <- NULL
+df3$O1_LONGITUDE <- NULL
+df3$latitude.x <- NULL
+df3$latitude.y <- NULL
+df3$longitude.x <- NULL
+df3$longitude.y <- NULL
+
+#year variable for wvs and evs waves
+df3$year <- with(df3, coalesce(A_YEAR, year))
+df3$A_YEAR <- NULL
+
+
+#harmonize attitude questions: Could you please mention any that you would NOT like to have as neighbors?
+
+# In wvs 1 = mentioned, 2 = not mentioned while in evs 0 = not mentioned, 1 = mentioned, so:
+df3$Q19[df3$Q19 == "2"] <- 0 #People of a different race
+df3$Q21[df3$Q21 == "2"] <- 0 #Immigrants/foreign workers
+df3$Q23[df3$Q23 == "2"] <- 0 #People of a different religion  (only in wvs)
+df3$Q26[df3$Q26 == "2"] <- 0 #People who speak a different language (only in wvs)
+
+#0 = would like to have them as neighbours, 1 =  would not like to have them as neighbours
+#combine in one column: 
+df3$n_race <- with(df3, coalesce(Q19, v47))
+df3$n_immigrant <- with(df3, coalesce(Q21, v54))
+#delete
+df3$Q19 <- NULL
+df3$v47 <- NULL
+df3$Q21 <- NULL
+df3$v54 <- NULL
+
+#variables only in one survey:
+#df3$Q23 #People of a different religion (wvs)
+#df3$Q26 #People who speak a different language (wvs)
+#df3$v53 ##Muslims (evs)
+
+#When jobs are scarce, employers should give priority to people of this country over immigrants
+#wvs measures this on a 5 point scale while evs on a 3 point scale. So, standardize:
+df3$Q34 <- ifelse(df3$Q34 < 3,  1,
+                   ifelse( df3$Q34 > 3, 2,
+                           ifelse( df3$Q34 == 3, 3, NA )  )  )
+
+df3$priority <- with(df3, coalesce(Q34, v102))
+
+df3$Q34 <- NULL
+df3$v102 <- NULL
+
+#Are you employed now or not? 
+#wvs: Q279 #(4+5+6+7= unemployed and 1,2,3 = employed; 8 - other)
+#evs: v89 #(1 -y, 2) 
+#r1:  unemp #(0,1 - y, 2 - dk)
+#r2: q89 #Value Labels: 0=No (not looking), 1=No (looking), 2=Yes, part time (not looking), 3=Yes, part time (looking), 4=Yes, full time (not looking), 5=Yes, full time (looking), 9=Don’t Know, 60=Traditional healer, 98=Refused to
+#standardize
+df3$Q279 <- ifelse(df3$Q279 < 4,  1,
+                   ifelse( df3$Q279 > 3 & df3$Q279 < 8 , 0,
+                           ifelse( df3$Q279 == 8, 9, NA)  )  )
+df3$v89 <- ifelse(df3$v89 == 1,  1,
+                   ifelse( df3$v89 == 2 , 0,  NA)  )  
+
+df3$unemp <- ifelse(df3$unemp == 1,  1,
+                   ifelse( df3$unemp == 0 , 0,
+                           ifelse( df3$unemp > 1, 9, NA)  )  )
+
+df3$q89 <- ifelse(df3$q89 > 1  & df3$q89 < 6,  1,
+                      ifelse( df3$q89 == "0" | df3$q89 == "1", 0, 9 )  ) 
+  
+#combine
+df3$unemp <- with(df3, coalesce(Q279, v89, unemp, q89))
+
+df3$Q279 <- NULL
+df3$v89 <- NULL
+df3$q89 <- NULL
+
+#Satisfaction: Feeling of happiness
+df3$happy <- with(df3, coalesce(Q46, v8))
+
+#delete
+df3$Q46 <- NULL
+df3$v8 <- NULL
+
+#Satisfaction with your life 
+df3$sat_life <- with(df3, coalesce(Q49, v66))
+
+df3$Q49 <- NULL
+df3$v66 <- NULL
+
+#similar variables in afrobarometer round 1: pfepas --> but (1-5 scale)
+
+#State of health (subjective) 
+df3$health <- with(df3, coalesce(Q47, v9))
+
+#delete
+df3$Q47 <- NULL
+df3$v9 <- NULL
+
+#Most people can be trusted (same scale 1,2)
+df3$trust <- with(df3, coalesce(Q57, v62, sctrust))
+
+#delete
+df3$Q57 <- NULL
+df3$v62 <- NULL
+df3$sctrust <- NULL
+
+#immigrant policy (Should government let the people in? 1- let anyone in, 4 -prohibit)
+df3$immig_pol <- with(df3, coalesce(Q130, v266))
+
+df3$Q130 <- NULL
+df3$v266 <- NULL
+
+#Immigrants increase crime problems; evs variable (v270) was on a 10 point scale while wvs variable (Q124) was on a 3 point scale. So, standardize:
+df3$v270 <- ifelse(df3$v270 > 5,  0,
+                   ifelse( df3$v270 < 5, 2,
+                           ifelse( df3$v270 == 5, 1, NA )  )  )
+
+df3$crime_immig <- with(df3, coalesce(Q124, v270))
+
+df3$Q124 <- NULL
+df3$v270 <- NULL
+
+#authoritarian values: Justifiable: death penalty
+df3$death_p <- with(df3, coalesce(Q195, v252))
+
+df3$Q195 <- NULL
+df3$v252 <- NULL
+
+#terrorism justifiable
+#evs:v267 #(binary: 1 - justified; 2- condemned; 3- neither)
+#wvs: Q192 #(10 point scale; 1 -never justified; 10 - always justifiable)
+#Now: 0-justified; 1- never justified; 2 - neither
+df3$Q192 <- ifelse(df3$Q192 > 5,  0,
+                   ifelse( df3$Q192 < 5, 1,
+                           ifelse( df3$Q192 == 5, 2, NA )  )  )
+
+df3$v267 <- ifelse(df3$v267 == 1,  0,
+                   ifelse( df3$v267 == 2 , 1,  
+                          ifelse( df3$v267 == 3 , 2,  NA)  )  )
+
+df3$terror_just <- with(df3, coalesce(Q192, v267))
+
+df3$Q192 <- NULL
+df3$v267 <- NULL
+
+#Interest in politics -
+#In evs: v186 (1-4)
+#in wvs: Q199 (1-4)
+#in R1: scint (1-5)
+#in R2: q27 #(0-2; 2- very interested, 1 = not)
+
+#Standardize into: 0 - not interested, 1- very interested, 2 - somewhat interested
+df3$v186 <- ifelse(df3$v186 == 1,  1,
+                   ifelse( df3$v186 == 4, 0,
+                           ifelse( df3$v186 == 2 | df3$v186 == 3, 2, NA )  )  )
+df3$Q199 <- ifelse(df3$Q199 == 1,  1,
+                   ifelse( df3$Q199 == 4, 0,
+                           ifelse( df3$Q199 == 2 | df3$Q199 == 3, 2, NA )  )  )
+df3$scint <- ifelse(df3$scint == 1,  1,
+                   ifelse( df3$scint == 4, 0,
+                           ifelse( df3$scint == 2 | df3$scint == 3, 2, 
+                                   ifelse( df3$scint >= 5, 9, NA )  )  )  )
+df3$q27 <- ifelse(df3$q27 == 2,  1,
+                   ifelse( df3$q27 == 0, 0,
+                           ifelse( df3$q27 == 1,  2, 
+                                   ifelse( df3$q27 > 2, 9, NA )  )  )  )
+#combine in 1 column
+df3$inter_pol <- with(df3, coalesce(v186, Q199, scint, q27))
+
+df3$v186 <- NULL
+df3$Q199 <- NULL
+df3$scint <- NULL
+df3$q27 <- NULL
+
+#Freedom or equality; in wvs(1=freedom, 2=equality) and in evs (1=freedom, 2=equality, 3=neither)
+df3$frdm_equ <- with(df3, coalesce(Q149, v192))
+
+df3$Q149 <- NULL
+df3$v192 <- NULL
+
+#Self-positioning in political scale -
+df3$self_pos <- with(df3, coalesce(Q240, v193))
+
+df3$Q240 <- NULL
+df3$v193 <- NULL
+
+#Basic kinds of attitudes concerning society - 
+df3$soc_att <- with(df3, coalesce(Q42, v200))
+
+df3$Q42 <- NULL
+df3$v200 <- NULL
+
+#Income equality - 
+df3$inc_equ <- with(df3, coalesce(Q106, v198))
+
+df3$Q106 <- NULL
+df3$v198 <- NULL
+
+#Close to a political party (list of parties); in afrobarometer r1 only binary variable (pidcls) so did not include it
+df3$q87a <- as.integer(df3$q87a) 
+df3$close_party <- with(df3, coalesce(Q223, v264, q87a))
+
+df3$Q223 <- NULL #Voting for which party? (wvs) 
+df3$v264 <- NULL #Which political party would you vote for: First choice (EVS)
+df3$q87a <- NULL #Close to which political party (afrobarometer round 2)
+
+#Member/attends religious group (yes/no) 
+#standardize into: 0 - not a member, 1 - member
+df3$Q94 <- ifelse(df3$Q94 == 0,  0,
+                   ifelse( df3$Q94 == 1 | df3$Q94 == 2, 1,  NA )  )  
+df3$v105 <- ifelse(df3$v105 == 2,  0,
+                   ifelse( df3$v105 == 1, 1,  NA )  )  
+df3$memrel <- ifelse(df3$memrel == 0,  0,
+                   ifelse( df3$memrel == 1, 1,  NA )  )  
+df3$q24a <- ifelse(df3$q24a == 0,  0,
+                   ifelse( df3$q24a == 1 | df3$q24a == 2 | df3$q24a == 3 , 1,  NA )  )
+
+df3$memrel <- with(df3, coalesce(Q94, v105, memrel, q24a))
+
+df3$Q94 <- NULL 
+df3$v105 <- NULL 
+df3$q24a <- NULL 
+
+#Are you a citizen of this country?
+df3$citizen <- with(df3, coalesce(Q269, v255))
+
+df3$Q269 <- NULL 
+df3$v255 <- NULL
+
+#country of birth or a respondent: ISO codes
+df3$birth_plc <- with(df3, coalesce(Q266, v307b))
+
+df3$Q266 <- NULL 
+df3$v307b <- NULL
+
+#marital status
+df3$married <- with(df3, coalesce(Q273, v313))
+
+df3$Q273 <- NULL 
+df3$v313 <- NULL
+
+#Do you have any children?
+df3$chldr <- with(df3, coalesce(Q274, v321))
+
+df3$Q274 <- NULL 
+df3$v321 <- NULL
+
+#In which country were your father and your mother (or those who raised you) born?
+df3$father <- with(df3, coalesce(Q268, v310b))
+df3$mother <- with(df3, coalesce(Q267, v312b))
+
+df3$Q268 <- NULL 
+df3$Q267 <- NULL
+df3$v310b <- NULL 
+df3$v312b <- NULL
+
+#What is the highest educational level that you have attained? 
+
+#edu1: more detailed scale from wvs, evs and afrobarometer r2
+#standardize into: 0=pre-primary /no edu, 1=primary, 2=incomplete secondary; 3=complete secondary; 4=incomplete uni-preparatory courses; 5=complete uni-preparatory (Short-cycle tertiary education); 6=some uni degree- lower level tertiary(BA); 7=uni degree-upper-level tertiary (MA, PhD)
+df3$Q275_2 <- ifelse(df3$Q275 == 0,  0,
+                   ifelse(df3$Q275 == 1, 1,
+                       ifelse(df3$Q275 == 2, 2,
+                           ifelse(df3$Q275 == 3, 3,
+                              ifelse(df3$Q275 == 4,  4,
+                                 ifelse(df3$Q275 == 5,  5,
+                                   ifelse(df3$Q275 == 6,  6,
+                                     ifelse(df3$Q275 == 7 | df3$Q275 == 8,  7, NA ))))))))
+
+df3$v336_4_2 <- ifelse(df3$v336_4 == 1,  0,
+                   ifelse(df3$v336_4 == 2, 1,
+                       ifelse(df3$v336_4 == 3, 2,
+                           ifelse(df3$v336_4 == 4, 3,
+                              ifelse(df3$v336_4 == 5,  4,
+                                 ifelse(df3$v336_4 == 6,  5,
+                                   ifelse(df3$v336_4 == 7,  6,
+                                     ifelse(df3$v336_4 == 8,  7, NA ))))))))
+
+df3$q84_2 <- ifelse(df3$q84 == 0 | df3$q84 == 1,  0,
+                   ifelse(df3$q84 == 2 | df3$q84 == 3,  1,
+                       ifelse(df3$q84 == 4, 2,
+                           ifelse(df3$q84 == 5, 3,
+                              ifelse(df3$q84 == 6, 4,
+                                 ifelse(df3$q84 == 7,  5,
+                                   ifelse(df3$q84 == 8, 6,
+                                     ifelse(df3$q84 == 9, 7, NA )))))))) 
+
+df3$edu1 <- with(df3, coalesce(Q275_2, v336_4_2, q84_2))
+
+#edu2: less detailed scale but all surveys combined: 0=No formal schooling; 1=Primary only; 2=Secondary; 3=Post-secondary
+df3$Q275 <- ifelse(df3$Q275 == 0, 0,
+                   ifelse(df3$Q275 > 0 & df3$Q275 < 3,  1,
+                       ifelse(df3$Q275 >= 3 & df3$Q275 < 6,  2,
+                           ifelse(df3$Q275 >= 6 & df3$Q275 < 9 , 3, NA))))
+
+df3$v336_4 <- ifelse(df3$v336_4 == 1, 0,
+                   ifelse(df3$v336_4 > 1 & df3$v336_4 < 4,  1,
+                       ifelse(df3$v336_4 >= 4 & df3$v336_4 < 7,  2,
+                           ifelse(df3$v336_4 >= 7 & df3$v336_4 < 9 , 3, NA))))
+
+df3$educ <- ifelse(df3$educ == 0, 0,
+                   ifelse(df3$educ == 1,  1,
+                       ifelse(df3$educ == 2, 2,
+                           ifelse(df3$educ == 3, 3, NA))))
+
+df3$q84 <- ifelse(df3$q84 == 0 |df3$q84 == 1 , 0,
+                   ifelse(df3$q84 > 1 & df3$q84 < 5,  1,
+                       ifelse(df3$q84 >= 5 & df3$q84 < 7,  2,
+                           ifelse(df3$q84 >= 7 & df3$q84 <= 9, 3, NA))))
+
+df3$edu2 <- with(df3, coalesce(Q275, v336_4, educ, q84))
+
+df3$Q275 <- NULL 
+df3$v336_4 <- NULL
+df3$educ <- NULL 
+df3$q84 <- NULL 
+
+df3$Q275_2 <- NULL 
+df3$v336_4_2 <- NULL
+df3$q84_2 <- NULL 
+
+#How much freedom of choice and control
+df3$choice_frdm <- with(df3, coalesce(Q48, v65))
+
+df3$Q48 <- NULL 
+df3$v65 <- NULL
+
+#Present vs. past: voting freedom 
+#R1: pfrvot #(6 = don't know)
+#R2: q36d #(9 = don't know) --> Standardize:
+df3$pfrvot <- ifelse(df3$pfrvot == 1, 1,
+                   ifelse(df3$pfrvot == 2, 2,
+                       ifelse(df3$pfrvot == 3, 3,
+                           ifelse(df3$pfrvot == 4, 4,
+                              ifelse(df3$pfrvot == 5, 5, NA )))))
+
+df3$q36d <- ifelse(df3$q36d == 1, 1,
+                   ifelse(df3$q36d == 2, 2,
+                       ifelse(df3$q36d == 3, 3,
+                           ifelse(df3$q36d == 4, 4,
+                              ifelse(df3$q36d == 5, 5, NA )))))
+
+df3$vote_freed <- with(df3, coalesce(pfrvot, q36d))
+
+df3$pfrvot <- NULL 
+df3$q36d <- NULL
+
+#indirect measurements of authoritarianism by Kalkan et al, 2019
+#Important child qualities: Good manners 
+#in wvs: Q7 (1,2) while in evs: v170 (0,1); Standardize:
+df3$Q7 <- ifelse(df3$Q7 == 1,  1,
+                   ifelse( df3$Q7 == 2, 0,  NA )  ) 
+
+df3$child_good <- with(df3, coalesce(Q7, v170))
+
+df3$Q7 <- NULL 
+df3$v170 <- NULL
+
+#Important child qualities: Tolerance and respect for other people: wvs: Q12(1,2) and v175 #(0,1)
+df3$Q12 <- ifelse(df3$Q12 == 1,  1,
+                   ifelse( df3$Q12 == 2, 0,  NA )  ) 
+
+df3$child_tolerant <- with(df3, coalesce(Q12, v175))
+
+df3$Q12 <- NULL 
+df3$v175 <- NULL
+
+#Important child qualities: obedience: wvs: Q17(1,2) and v180(0,1)
+df3$Q17 <- ifelse(df3$Q17 == 1,  1,
+                   ifelse( df3$Q17 == 2, 0,  NA )  ) 
+
+df3$child_obedient <- with(df3, coalesce(Q17, v180))
+
+df3$Q17 <- NULL 
+df3$v180 <- NULL
+
+#How often gone without food
+#WVS: Q51 #(1-4) 1.- Often 2.- Sometimes 3.- Rarely 4.- Never
+#R1: povfoo #(0-5) 0=Never, 1=Occasionally/Sometimes/Rarely, 2=Frequently/Often, 3=Always, 5=Don’t Know
+#R2: q9a #(0-4) 0=Never, 1=Just once or twice, 2=Several times, 3=Many times, 4=Always, 9=Don’t Know
+df3$Q51 <- ifelse(df3$Q51 == 4, 0,
+                   ifelse(df3$Q51 == 3, 1,
+                       ifelse(df3$Q51 == 2, 2,
+                           ifelse(df3$Q51 == 1, 3, NA ))))
+
+df3$povfoo <- ifelse(df3$povfoo == 0, 0,
+                   ifelse(df3$povfoo == 1, 1,
+                       ifelse(df3$povfoo == 2, 2,
+                           ifelse(df3$povfoo == 3, 3, NA ))))
+
+df3$q9a <- ifelse(df3$q9a == 0, 0,
+                   ifelse(df3$q9a == 1 | df3$q9a == 2, 1,
+                       ifelse(df3$q9a == 3, 2,
+                           ifelse(df3$q9a == 4, 3, NA ))))
+
+df3$without_food <- with(df3, coalesce(Q51, povfoo, q9a))
+
+df3$Q51 <- NULL 
+df3$povfoo <- NULL
+df3$q9a <- NULL
+
+#Gone without healthcare 
+#WVS: Q53 #(1-4)
+#R1: povhth #(0-5)
+#R2: q9c #(0-4)
+df3$Q53 <- ifelse(df3$Q53 == 4, 0,
+                   ifelse(df3$Q53 == 3, 1,
+                       ifelse(df3$Q53 == 2, 2,
+                           ifelse(df3$Q53 == 1, 3, NA ))))
+
+df3$povhth <- ifelse(df3$povhth == 0, 0,
+                   ifelse(df3$povhth == 1, 1,
+                       ifelse(df3$povhth == 2, 2,
+                           ifelse(df3$povhth == 3, 3, NA ))))
+
+df3$q9c <- ifelse(df3$q9c == 0, 0,
+                   ifelse(df3$q9c == 1 | df3$q9c == 2, 1,
+                       ifelse(df3$q9c == 3, 2,
+                           ifelse(df3$q9c == 4, 3, NA ))))
+
+df3$without_med <- with(df3, coalesce(Q53, povhth, q9c))
+
+df3$Q53 <- NULL 
+df3$povhth <- NULL
+df3$q9c <- NULL
+
+#Gone without cash income 
+#WVS: Q54
+#R1: povinc
+#R2: q9f
+df3$Q54 <- ifelse(df3$Q54 == 4, 0,
+                   ifelse(df3$Q54 == 3, 1,
+                       ifelse(df3$Q54 == 2, 2,
+                           ifelse(df3$Q54 == 1, 3, NA ))))
+
+df3$povinc <- ifelse(df3$povinc == 0, 0,
+                   ifelse(df3$povinc == 1, 1,
+                       ifelse(df3$povinc == 2, 2,
+                           ifelse(df3$povinc == 3, 3, NA ))))
+
+df3$q9f <- ifelse(df3$q9f == 0, 0,
+                   ifelse(df3$q9f == 1 | df3$q9f == 2, 1,
+                       ifelse(df3$q9f == 3, 2,
+                           ifelse(df3$q9f == 4, 3, NA ))))
+
+df3$without_cash <- with(df3, coalesce(Q54, povinc, q9f))
+
+df3$Q54 <- NULL 
+df3$povinc <- NULL
+df3$q9f <- NULL
+
+#Urban or rural
+#WVS: H_URBRURAL 
+#R1: urbrur.x 
+#R2: urbrur.y #character variable
+df3$urbrur.x <- ifelse(df3$urbrur.x == 1, 1,
+                   ifelse(df3$urbrur.x == 2 , 2,  NA ))
+df3$urbrur.y <- ifelse(df3$urbrur.y == 1, 1,
+                   ifelse(df3$urbrur.y == 2 , 2,  NA ))
+
+df3$urban_ru <- with(df3, coalesce(H_URBRURAL, urbrur.x, urbrur.y))
+
+df3$H_URBRURAL <- NULL 
+df3$urbrur.x <- NULL
+df3$urbrur.y <- NULL
+
+#news - newspaper
+#WVS: Q201 #(1-5) 1.- Daily 2.- Weekly 3.- Monthly 4.- Less than monthly 5.- Never
+#R1: mednew #(0-5) 0=Never, 1=Less than once a month, 2=About once a month, 3=About once a week/few times a month, 4=Several times a week/a few times a week, 5=Every day --> combine 2 & 3
+#R2: q26c #(0-4) #0=Never, 1=Less than once a month, 2=A few times a month, 3=A few times a week, 4=Every day
+
+#standardize into: 0 - never, 1 - Less than monthly, 2 - Monthly, 3 - Weekly, 4- Daily
+df3$Q201 <- ifelse(df3$Q201 == 5, 0,
+                   ifelse(df3$Q201 == 4, 1,
+                       ifelse(df3$Q201 == 3, 2,
+                           ifelse(df3$Q201 == 2, 3, 
+                                  ifelse(df3$Q201 == 1, 4, NA )))))
+
+df3$mednew <- ifelse(df3$mednew == 0, 0,
+                   ifelse(df3$mednew == 1, 1,
+                       ifelse(df3$mednew == 2 | df3$mednew == 3, 2,
+                           ifelse(df3$mednew == 4, 3, 
+                                  ifelse(df3$mednew == 5, 4, NA )))))
+
+df3$q26c <- ifelse(df3$q26c == 0, 0,
+                   ifelse(df3$q26c == 1, 1,
+                       ifelse(df3$q26c == 2, 2,
+                           ifelse(df3$q26c == 3, 3, 
+                                  ifelse(df3$q26c == 4, 4, NA )))))
+
+df3$newsp <- with(df3, coalesce(Q201, mednew, q26c))
+
+df3$Q201 <- NULL 
+df3$mednew <- NULL
+df3$q26c <- NULL
+
+#tv
+df3$Q202 <- ifelse(df3$Q202 == 5, 0,
+                   ifelse(df3$Q202 == 4, 1,
+                       ifelse(df3$Q202 == 3, 2,
+                           ifelse(df3$Q202 == 2, 3, 
+                                  ifelse(df3$Q202 == 1, 4, NA )))))
+
+df3$medtv <- ifelse(df3$medtv == 0, 0,
+                   ifelse(df3$medtv == 1, 1,
+                       ifelse(df3$medtv == 2 | df3$medtv == 3, 2,
+                           ifelse(df3$medtv == 4, 3, 
+                                  ifelse(df3$medtv == 5, 4, NA )))))
+
+df3$q26b <- ifelse(df3$q26b == 0, 0,
+                   ifelse(df3$q26b == 1, 1,
+                       ifelse(df3$q26b == 2, 2,
+                           ifelse(df3$q26b == 3, 3, 
+                                  ifelse(df3$q26b == 4, 4, NA )))))
+
+df3$tv <- with(df3, coalesce(Q202, medtv, q26b))
+
+df3$Q202 <- NULL 
+df3$medtv <- NULL
+df3$q26b <- NULL
+
+#radio
+df3$Q203 <- ifelse(df3$Q203 == 5, 0,
+                   ifelse(df3$Q203 == 4, 1,
+                       ifelse(df3$Q203 == 3, 2,
+                           ifelse(df3$Q203 == 2, 3, 
+                                  ifelse(df3$Q203 == 1, 4, NA )))))
+
+df3$medrad <- ifelse(df3$medrad == 0, 0,
+                   ifelse(df3$medrad == 1, 1,
+                       ifelse(df3$medrad == 2 | df3$medrad == 3, 2,
+                           ifelse(df3$medrad == 4, 3, 
+                                  ifelse(df3$medrad == 5, 4, NA )))))
+
+df3$q26a <- ifelse(df3$q26a == 0, 0,
+                   ifelse(df3$q26a == 1, 1,
+                       ifelse(df3$q26a == 2, 2,
+                           ifelse(df3$q26a == 3, 3, 
+                                  ifelse(df3$q26a == 4, 4, NA )))))
+
+df3$radio <- with(df3, coalesce(Q203, medrad, q26a))
+
+df3$Q203 <- NULL 
+df3$medrad <- NULL
+df3$q26a <- NULL
+
+#Politics and government too complicated
+df3$q28a <- as.integer(df3$q28a)
+df3$pltcs_comp <- with(df3, coalesce(scund, q28a))
+
+df3$scund <- NULL 
+df3$q28a <- NULL
+
+#country: abbreviation not available for afrobarometer round 2
+#EVS: c_abrv
+#R1: country.x
+#WVS: $B_COUNTRY_ALPHA
+
+df3$country_3 <- with(df3, coalesce(c_abrv, country.x, B_COUNTRY_ALPHA ))
+
+df3$c_abrv <- NULL 
+df3$country.x <- NULL
+df3$B_COUNTRY_ALPHA <- NULL
+
+#write.csv(df3,"~/Desktop/MZES/Daniel/Datasets/geocoded-datasets/df3.csv", row.names = FALSE)
 
 ```
 
